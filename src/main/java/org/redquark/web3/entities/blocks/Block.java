@@ -1,6 +1,7 @@
 package org.redquark.web3.entities.blocks;
 
 import lombok.Builder;
+import lombok.Data;
 import org.redquark.web3.entities.transactions.Transaction;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 /**
  * This class represents the fundamental entity of a blockchain, i.e, a block
  */
+@Data
 @Builder
 public class Block {
 

@@ -1,6 +1,7 @@
 package org.redquark.web3.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.redquark.web3.entities.transactions.Transaction;
 import org.redquark.web3.services.HashService;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -78,5 +81,25 @@ public class HashServiceImpl implements HashService {
             log.error("Could not verify Elliptic Curve DSA on the input due to: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getMerkleRoot(List<Transaction> transactions) {
+        // Total transactions
+        int count = transactions.size();
+        List<String> previousTreeLayer = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            previousTreeLayer.add(transaction.getTransactionId());
+        }
+        List<String> treeLayer = previousTreeLayer;
+        while (count > 1) {
+            treeLayer = new ArrayList<>();
+            for (int i = 1; i < previousTreeLayer.size(); i++) {
+                treeLayer.add(createSHA256Hash(previousTreeLayer.get(i - 1).concat(previousTreeLayer.get(i))));
+            }
+            count = treeLayer.size();
+            previousTreeLayer = treeLayer;
+        }
+        return (treeLayer.size() == 1) ? treeLayer.get(0) : "";
     }
 }

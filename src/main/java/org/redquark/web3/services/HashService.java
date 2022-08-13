@@ -1,8 +1,11 @@
 package org.redquark.web3.services;
 
+import org.redquark.web3.entities.transactions.Transaction;
+
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
 
 public interface HashService {
 
@@ -32,4 +35,10 @@ public interface HashService {
      * @return true, if signing was done correctly, false otherwise
      */
     boolean verifyECDSASignature(PublicKey publicKey, String data, byte[] signature);
+
+    /**
+     * @param transactions - list of transactions
+     * @return merkle root for this block
+     */
+    String getMerkleRoot(List<Transaction> transactions);
 }
