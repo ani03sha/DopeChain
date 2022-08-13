@@ -1,13 +1,12 @@
-package org.redquark.web3.DopeChain;
+package org.redquark.web3;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
+public class DopeChain {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(DopeChain.class, args);
 	}
-
 }
