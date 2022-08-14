@@ -9,6 +9,7 @@ import org.redquark.web3.entities.transactions.Transaction;
 import org.redquark.web3.entities.transactions.TransactionOutput;
 import org.redquark.web3.entities.wallets.Wallet;
 import org.redquark.web3.services.BlockService;
+import org.redquark.web3.services.ChainValidatorService;
 import org.redquark.web3.services.TransactionService;
 import org.redquark.web3.services.WalletService;
 import org.springframework.boot.ApplicationArguments;
@@ -29,6 +30,7 @@ import java.util.Map;
 @Slf4j
 public class DopeChainStartupRunner implements ApplicationRunner {
 
+    // Global list of all the blocks mined
     public static final List<Block> BLOCKCHAIN = new ArrayList<>();
 
     // Global list of unspent transaction output mappings
@@ -41,6 +43,7 @@ public class DopeChainStartupRunner implements ApplicationRunner {
     private final WalletService walletService;
     private final TransactionService transactionService;
     private final BlockService blockService;
+    private final ChainValidatorService chainValidatorService;
     private final DopeConfig dopeConfig;
 
     @Override
@@ -91,5 +94,11 @@ public class DopeChainStartupRunner implements ApplicationRunner {
         log.info("Block is mined successfully with hash: {}", genesis.getCurrentHash());
         log.info("Block is added to the blockchain");
         BLOCKCHAIN.add(genesis);
+        log.info("Checking if the chain is valid...");
+        if (chainValidatorService.isChainValid(BLOCKCHAIN)) {
+            log.info("Chain is valid!");
+            return;
+        }
+        log.info("Chain is not valid!");
     }
 }
