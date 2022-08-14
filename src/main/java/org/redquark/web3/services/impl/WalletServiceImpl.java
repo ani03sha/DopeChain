@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.redquark.web3.entities.transactions.Transaction;
 import org.redquark.web3.entities.transactions.TransactionInput;
 import org.redquark.web3.entities.transactions.TransactionOutput;
-import org.redquark.web3.entities.wallets.Wallet;
 import org.redquark.web3.services.TransactionService;
 import org.redquark.web3.services.WalletService;
 import org.springframework.stereotype.Service;
@@ -16,6 +15,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
@@ -47,12 +47,12 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public BigDecimal getBalance(Wallet wallet, Map<String, TransactionOutput> UTXOs) {
+    public BigDecimal getBalance(PublicKey address, Map<String, TransactionOutput> UTXOs) {
         BigDecimal total = new BigDecimal("");
         for (Map.Entry<String, TransactionOutput> entry : UTXOs.entrySet()) {
             TransactionOutput UTXO = entry.getValue();
             // Check if the coin belongs to the one who is claiming
-            if (UTXO.getRecipientAddress().equals(wallet.getPublicKey())) {
+            if (UTXO.getRecipientAddress().equals(address)) {
                 UTXOs.put(UTXO.getId(), UTXO);
                 total = total.add(UTXO.getAmount());
             }
@@ -61,9 +61,9 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Transaction sendFunds(Wallet wallet, PublicKey recipient, BigDecimal amount, Map<String, TransactionOutput> UTXOs) {
+    public Transaction sendFunds(PublicKey sender, PublicKey recipient, PrivateKey signingKey, BigDecimal amount, Map<String, TransactionOutput> UTXOs) {
         log.info("Checking if there are enough funds to send...");
-        if (getBalance(wallet, UTXOs).compareTo(amount) < 0) {
+        if (getBalance(sender, UTXOs).compareTo(amount) < 0) {
             log.error("Not enough funds to send. Discarding operation!");
             return null;
         }
@@ -86,14 +86,14 @@ public class WalletServiceImpl implements WalletService {
         log.info("Creating a new transaction...");
         Transaction newTransaction = Transaction
                 .builder()
-                .senderAddress(wallet.getPublicKey())
+                .senderAddress(sender)
                 .recipientAddress(recipient)
                 .amount(amount)
                 .inputs(inputs)
                 .build();
         log.info("A new transaction is created!");
         log.info("Signing the transaction...");
-        newTransaction.setSignature(transactionService.generateSignature(newTransaction, wallet.getPrivateKey()));
+        newTransaction.setSignature(transactionService.generateSignature(newTransaction, signingKey));
         log.info("Transaction is signed!");
         log.info("Removing inputs from the global UTXOs...");
         for (TransactionInput input : newTransaction.getInputs()) {
