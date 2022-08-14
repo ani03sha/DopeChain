@@ -1,1 +1,13 @@
+spring:
+    application:
+        name: Dope Chain
+        description: A sample blockchain implementation
 
+dsa-config:
+    algorithm: ECDSA
+
+transaction-config:
+    minimum-transaction: 0.1
+
+block-config:
+    difficulty: 5

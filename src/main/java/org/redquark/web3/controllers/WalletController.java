@@ -20,7 +20,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import static org.redquark.web3.runner.DopeChainStartupRunner.UTXOs;
+import static org.redquark.web3.runners.DopeChainStartupRunner.UTXOs;
 
 @RestController
 @RequestMapping(value = "/api/v1/dopechain/wallet")
